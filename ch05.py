@@ -71,8 +71,6 @@ class Affine:
         dx =
 
 
-
-
 apple = 100
 apple_num = 2
 orange = 150
