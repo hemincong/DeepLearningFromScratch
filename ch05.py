@@ -1,4 +1,6 @@
 import numpy as np
+from common.functions import softmax, cross_entropy_error
+from collections import OrderedDict
 
 
 class MulLayer:
@@ -55,6 +57,7 @@ class Sigmoid:
     def backward(self, dout):
         return dout * (1.0 - self.out) * self.out
 
+
 class Affine:
     def __init__(self, W, b):
         self.W = W
@@ -68,7 +71,56 @@ class Affine:
         return np.dot(x, self.W.T) + self.b
 
     def backward(self, dout):
-        dx =
+        dx = np.dot(dout, self.W.T)
+        self.dW = np.dot(self.x.T, dout)
+        self.db = np.dot(dout, axis=0)
+
+        return dx
+
+
+class SoftMaxWithLoss:
+    def __init__(self):
+        self.loss = None
+        self.y = None
+        self.t = None
+
+    def forward(self, x, t):
+        self.t = t
+        self.y = softmax(x)
+        self.loss = cross_entropy_error(self.y, t)
+
+        return self.loss
+
+    def backward(self, dout=1):
+        batch_size = self.t.shape[0]
+        dx = (self.y - self.t) / batch_size
+
+        return dx
+
+
+class TwoLayerNet:
+    def __init__(self, input_size, hidden_size, output_size, weight_init_std=0.01):
+        self.params = {
+            'W1': weight_init_std * np.random.randn(input_size, hidden_size),
+            'b1': np.zeros(hidden_size),
+            'W2': weight_init_std * np.random.randn(hidden_size, output_size),
+            'b2': np.zeros(output_size)
+        }
+
+        self.layers = OrderedDict()
+        self.layers['Affine1'] = Affine(self.params['W1'], self.params['b1'])
+        self.layers['Relu1'] = Relu()
+        self.layers['Affine2'] = Affine(self.params['W2'], self.params['b2'])
+
+        self.lastLayer = SoftMaxWithLoss()
+
+    def predict(self, x):
+        for layer in self.layers.values():
+            x = layer.forward(x)
+
+        return x
+
+
 
 
 apple = 100

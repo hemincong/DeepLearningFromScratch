@@ -4,8 +4,11 @@ from common.functions import *
 from common.gradient import numerical_gradient
 
 sys.path.append(os.pardir)
+
+
 def sigmoid_grad(x):
     return (1.0 - sigmoid(x)) * sigmoid(x)
+
 
 class TwoLayerNet:
 
