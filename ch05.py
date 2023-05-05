@@ -1,5 +1,6 @@
 import numpy as np
 from common.functions import softmax, cross_entropy_error
+from common.gradient import numerical_gradient
 from collections import OrderedDict
 
 
@@ -119,6 +120,49 @@ class TwoLayerNet:
             x = layer.forward(x)
 
         return x
+
+    def loss(self, x, t):
+        y = self.predict(x)
+        return self.lastLayer.forward(y, t)
+
+    def accuracy(self, x, t):
+        y = self.predict(x)
+        y = np.argmax(y, axis=1)
+        if t.ndim != 1:
+            t = np.argmax(t, axis=1)
+
+        return np.sum(y == t) / float(x.shape[0])
+
+    def numerical_gradient(self, x, t):
+        loss_W = lambda W : self.loss(x, t)
+        return {
+            'W1': numerical_gradient(loss_W, self.params['W1']),
+            'b1': numerical_gradient(loss_W, self.params['b1']),
+            'W2': numerical_gradient(loss_W, self.params['W2']),
+            'b2': numerical_gradient(loss_W, self.params['b2'])
+        }
+
+    def gradient(self, x, t):
+        self.loss(x, t)
+
+        dout = 1
+        dout = self.lastLayer.backward(dout)
+
+        layers = list(self.layers.values())
+        layers.reverse()
+        for layer in layers:
+            dout = layer.backward(dout)
+
+        return {
+            'W1': self.layers['Affine1'].dW,
+            'b1': self.layers['Affine1'].db,
+            'W2': self.layers['Affine2'].dW,
+            'b2': self.layers['Affine2'].db,
+        }
+
+
+
+
 
 
 
