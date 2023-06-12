@@ -225,8 +225,10 @@ for i in range(iters_num):
     x_batch = x_train[batch_mask]
     t_batch = t_train[batch_mask]
 
+    # 求梯度
     grad = network.gradient(x_batch, t_batch)
 
+    # 实际上是SGD update
     for key in ['W1', 'b1', 'W2', 'b2']:
         network.params[key] -= learning_rate * grad[key]
 
@@ -234,9 +236,9 @@ for i in range(iters_num):
     train_loss_list.append(loss)
 
     if i % iter_per_epoch == 0:
+        # 求准确率
         train_acc = network.accuracy(x_train, t_train)
         test_acc = network.accuracy(x_test, t_test)
         train_acc_list.append(train_acc)
         test_acc_list.append(test_acc)
         print(train_acc, test_acc)
-
